@@ -5,8 +5,9 @@ return {
         name = "catppuccin",
         lazy = false,
         priority = 21000,
-
     },
+
+
     {
         "folke/tokyonight.nvim",
         lazy = false,
@@ -16,6 +17,7 @@ return {
             floats = "transparent",
         },
     },
+
     -- file browser
     {
         "nvim-lualine/lualine.nvim",
@@ -25,12 +27,14 @@ return {
         opts = {},
         event = "VeryLazy",
     },
+
     -- tabline
     {
         "kdheepak/tabline.nvim",
         opts = {},
         event = "BufWinEnter",
     },
+
     -- indent
     {
         "echasnovski/mini.indentscope",
@@ -39,6 +43,7 @@ return {
         },
         event = "BufRead",
     },
+    
     -- nvim-treesitter
     {
         "nvim-treesitter/nvim-treesitter",
@@ -81,6 +86,7 @@ return {
             })
         end,
     },
+
     -- noice
     {
         "folke/noice.nvim",
@@ -106,6 +112,7 @@ return {
             },
         },
     },
+
     -- git
     {
         "lewis6991/gitsigns.nvim",
@@ -113,4 +120,3 @@ return {
         event = { "BufReadPre", "BufNewFile" },
     },
 }
-

@@ -1,4 +1,4 @@
--- lazy.nvim boot strap
+-- lazy.nvim boot strapw
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then
     vim.fn.system({
@@ -28,29 +28,17 @@ local opts = {
 
 -- leader key
 vim.g.mapleader = " "
-vim.keymap.set("n", "<leader>e", function()
-  -- Neo-tree バッファの番号を取得
-  local neo_tree_bufnr = vim.fn.bufnr("neo-tree://")
-  
-  -- Neo-tree が開かれているウィンドウを取得
-  local neo_tree_open = false
-  for _, win in ipairs(vim.fn.win_findbuf(neo_tree_bufnr)) do
-    if vim.api.nvim_win_is_valid(win) then
-      neo_tree_open = true
-      break
-    end
-  end
-
-  -- 開いている場合はフォーカスを移動し、閉じている場合はトグルで開く
-  if neo_tree_open then
-    vim.cmd("Neotree focus")
-  else
-    vim.cmd("Neotree toggle")
-  end
-end, { noremap = true, silent = true })
 
 -- 挿入モードで "jk" を押すとノーマルモードに戻る
 vim.keymap.set("i", "jk", "<ESC>", { noremap = true, silent = true })
+-- Viewモードでのクリップボード操作
+vim.keymap.set("v", "<leader>y", '"+y', { noremap = true, silent = true, desc = "Copy to clipboard" }) -- 選択範囲をコピー
+vim.keymap.set("v", "<leader>d", '"+d', { noremap = true, silent = true, desc = "Cut to clipboard" })  -- 選択範囲を切り取り
+vim.keymap.set("v", "<leader>p", '"+p', { noremap = true, silent = true, desc = "Paste from clipboard" }) -- クリップボードの内容を貼り付け
+
+-- ファイル切り替え
+vim.keymap.set("n", "<C-h>", "<cmd>bprev<CR>")
+vim.keymap.set("n", "<C-l>", "<cmd>bnext<CR>")
 
 -- lazy setup
 require("lazy").setup(plugins, opts)

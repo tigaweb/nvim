@@ -8,3 +8,7 @@ end
 
 -- Neotree
 keymap("n", "<leader>nn", ":Neotree toggle<cr>", extend_opts("Neotree Toggle"))
+
+-- bufferの移動
+vim.keymap.set("n", "<C-n>", ":bnext<Return>", opts)
+vim.keymap.set("n", "<C-p>", ":bprevious<Return>", opts)

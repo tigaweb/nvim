@@ -34,6 +34,7 @@ return {
               hide_dotfiles = true, -- .で始まるファイルを非表示
               hide_gitignored = true, -- .gitignoreに記載されたファイルを非表示
         },
+      close_if_last_window = false, -- Neotree を最後のウィンドウでも閉じない
       },
       -- neo-treeウィンドウ内でのキーマッピング
       window = {

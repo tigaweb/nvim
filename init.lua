@@ -40,6 +40,12 @@ vim.keymap.set("v", "<leader>p", '"+p', { noremap = true, silent = true, desc = 
 vim.keymap.set("n", "<C-h>", "<cmd>bprev<CR>")
 vim.keymap.set("n", "<C-l>", "<cmd>bnext<CR>")
 
+-- 現在のタブを閉じる
+vim.keymap.set("n", "<leader>tc", ":tabclose<CR>", { noremap = true, silent = true, desc = "Close Tab" })
+
+-- 新しいタブを作成
+vim.keymap.set("n", "<leader>tn", ":tabnew<CR>", { noremap = true, silent = true, desc = "New Tab" })
+
 -- lazy setup
 require("lazy").setup(plugins, opts)
 

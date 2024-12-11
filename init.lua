@@ -1,3 +1,5 @@
+vim.env.LANG = 'ja_JP.UTF-8'
+
 -- lazy.nvim boot strapw
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then
@@ -54,8 +56,6 @@ vim.defer_fn(function()
   vim.api.nvim_set_hl(0, "NeoTreeCurrentFile", { bg = "#e6e617", fg = "#ebdbb2", bold = true })
   vim.api.nvim_set_hl(0, "NeoTreeOtherBuffers", { bg = "#c317e6", fg = "#a89984", italic = true })
 end, 100) 
-
-vim.env.LANG = 'ja_JP.UTF-8'
 
 -- lazy setup
 require("lazy").setup(plugins, opts)

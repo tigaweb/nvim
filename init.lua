@@ -29,22 +29,33 @@ local opts = {
 -- leader key
 vim.g.mapleader = " "
 
--- 挿入モードで "jk" を押すとノーマルモードに戻る
 vim.keymap.set("i", "jk", "<ESC>", { noremap = true, silent = true })
--- Viewモードでのクリップボード操作
-vim.keymap.set("v", "<leader>y", '"+y', { noremap = true, silent = true, desc = "Copy to clipboard" }) -- 選択範囲をコピー
-vim.keymap.set("v", "<leader>d", '"+d', { noremap = true, silent = true, desc = "Cut to clipboard" })  -- 選択範囲を切り取り
-vim.keymap.set("v", "<leader>p", '"+p', { noremap = true, silent = true, desc = "Paste from clipboard" }) -- クリップボードの内容を貼り付け
+vim.keymap.set("v", "<leader>y", '"+y', { noremap = true, silent = true, desc = "Copy to clipboard" })
+vim.keymap.set("v", "<leader>d", '"+d', { noremap = true, silent = true, desc = "Cut to clipboard" })
+vim.keymap.set("v", "<leader>p", '"+p', { noremap = true, silent = true, desc = "Paste from clipboard" })
 
--- ファイル切り替え
+
 vim.keymap.set("n", "<C-h>", "<cmd>bprev<CR>")
 vim.keymap.set("n", "<C-l>", "<cmd>bnext<CR>")
 
--- 現在のタブを閉じる
 vim.keymap.set("n", "<leader>tc", ":tabclose<CR>", { noremap = true, silent = true, desc = "Close Tab" })
 
--- 新しいタブを作成
 vim.keymap.set("n", "<leader>tn", ":tabnew<CR>", { noremap = true, silent = true, desc = "New Tab" })
+
+vim.cmd([[
+  command! BufOnly execute '%bdelete|edit#|bdelete#'
+]])
+
+vim.keymap.set("n", "<leader>bd", ":bdelete<CR>", { noremap = true, silent = true, desc = "Delete Current Buffer" })
+
+vim.keymap.set("n", "<leader>bo", ":BufOnly<CR>", { noremap = true, silent = true, desc = "Delete Other Buffers" })
+
+vim.defer_fn(function()
+  vim.api.nvim_set_hl(0, "NeoTreeCurrentFile", { bg = "#e6e617", fg = "#ebdbb2", bold = true })
+  vim.api.nvim_set_hl(0, "NeoTreeOtherBuffers", { bg = "#c317e6", fg = "#a89984", italic = true })
+end, 100) 
+
+vim.env.LANG = 'ja_JP.UTF-8'
 
 -- lazy setup
 require("lazy").setup(plugins, opts)

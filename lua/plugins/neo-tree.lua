@@ -36,12 +36,37 @@ return {
         },
       close_if_last_window = false, -- Neotree を最後のウィンドウでも閉じない
       },
+      default_component_configs = {
+        name = {
+          highlight_opened_files = "all", -- バッファで開いているファイルを強調
+        },
+      },
+      custom_highlights = {
+        NeoTreeCurrentFile = { bg = "#e6e617", fg = "#ebdbb2", bold = true },
+        NeoTreeOtherBuffers = { bg = "#c317e6", fg = "#a89984", italic = true },
+      },
+      buffers = {
+        follow_current_file = true, -- 現在のファイルを追従
+        show_unloaded = true, -- 開かれていないバッファも表示
+      },
       -- neo-treeウィンドウ内でのキーマッピング
       window = {
         mappings = {
-          ["<C-g>"] = "open_lazygit",   -- Ctrl+G: LazyGitを開く
           ["<C-t>"] = "open_in_wezterm", -- Ctrl+T: WezTermで開く
           ["<C-h>"] = "toggle_hidden",   -- Ctrl+H: 隠しファイルの表示切替
+        },
+        {
+          position = "left", -- 左側に固定
+          width = 30, -- ウィンドウ幅
+        },
+      },
+      event_handlers = {
+        {
+          event = "neo_tree_window_before_open",
+          handler = function()
+            -- ウィンドウが開く前に常に左側に設定
+            vim.cmd("wincmd H")
+          end,
         },
       },
       -- カスタムコマンドの定義

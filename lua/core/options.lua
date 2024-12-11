@@ -4,6 +4,8 @@ vim.cmd('language en_US') -- 表示言語を英語にする（Mac）
 
 -- ファイル
 vim.opt.fileencoding = "utf-8" -- エンコーディングをUTF-8に設定
+vim.opt.fileencodings = { "utf-8", "sjis", "euc-jp", "latin1" }
+vim.opt.clipboard = "unnamed,unnamedplus"
 vim.opt.swapfile = false -- スワップファイルを作成しない
 -- vim.opt.helplang = "ja" -- ヘルプファイルの言語は日本語
 vim.opt.hidden = true -- バッファを切り替えるときに

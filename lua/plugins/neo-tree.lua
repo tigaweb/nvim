@@ -54,6 +54,8 @@ return {
         mappings = {
           ["<C-t>"] = "open_in_wezterm", -- Ctrl+T: WezTermで開く
           ["<C-h>"] = "toggle_hidden",   -- Ctrl+H: 隠しファイルの表示切替
+          ["<2-LeftMouse>"] = "open", -- シングルクリックでファイルを開く
+          ["<CR>"] = "open",          -- Enter キーでファイルを開く
         },
         {
           position = "left", -- 左側に固定

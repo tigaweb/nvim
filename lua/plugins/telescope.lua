@@ -18,5 +18,12 @@ return {
     vim.keymap.set('n', '<leader>ff', builtin.find_files, { desc = 'Telescope find files' })
     vim.keymap.set('n', '<leader>fg', builtin.live_grep, { desc = 'Telescope live grep' })
     vim.keymap.set('n', '<leader>fh', builtin.help_tags, { desc = 'Telescope help tags' })
+    vim.keymap.set("n", "<leader>fd", function()
+      vim.ui.input({ prompt = "Enter directory: " }, function(input)
+        if input then
+          require('telescope.builtin').live_grep({ search_dirs = { input } })
+        end
+      end)
+    end, { noremap = true, silent = true, desc = "Live Grep in user-specified directory" })
   end
 }

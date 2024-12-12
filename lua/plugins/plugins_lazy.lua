@@ -7,7 +7,6 @@ return {
         priority = 21000,
     },
 
-
     {
         "folke/tokyonight.nvim",
         lazy = false,
@@ -43,7 +42,7 @@ return {
         },
         event = "BufRead",
     },
-    
+
     -- nvim-treesitter
     {
         "nvim-treesitter/nvim-treesitter",

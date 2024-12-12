@@ -1,4 +1,4 @@
-vim.env.LANG = 'ja_JP.UTF-8'
+vim.env.LANG = "ja_JP.UTF-8"
 
 -- lazy.nvim boot strapw
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
@@ -36,7 +36,6 @@ vim.keymap.set("v", "<leader>y", '"+y', { noremap = true, silent = true, desc = 
 vim.keymap.set("v", "<leader>d", '"+d', { noremap = true, silent = true, desc = "Cut to clipboard" })
 vim.keymap.set("v", "<leader>p", '"+p', { noremap = true, silent = true, desc = "Paste from clipboard" })
 
-
 vim.keymap.set("n", "<C-h>", "<cmd>bprev<CR>")
 vim.keymap.set("n", "<C-l>", "<cmd>bnext<CR>")
 
@@ -53,9 +52,9 @@ vim.keymap.set("n", "<leader>bd", ":bdelete<CR>", { noremap = true, silent = tru
 vim.keymap.set("n", "<leader>bo", ":BufOnly<CR>", { noremap = true, silent = true, desc = "Delete Other Buffers" })
 
 vim.defer_fn(function()
-  vim.api.nvim_set_hl(0, "NeoTreeCurrentFile", { bg = "#e6e617", fg = "#ebdbb2", bold = true })
-  vim.api.nvim_set_hl(0, "NeoTreeOtherBuffers", { bg = "#c317e6", fg = "#a89984", italic = true })
-end, 100) 
+    vim.api.nvim_set_hl(0, "NeoTreeCurrentFile", { bg = "#e6e617", fg = "#ebdbb2", bold = true })
+    vim.api.nvim_set_hl(0, "NeoTreeOtherBuffers", { bg = "#c317e6", fg = "#a89984", italic = true })
+end, 100)
 
 -- lazy setup
 require("lazy").setup(plugins, opts)

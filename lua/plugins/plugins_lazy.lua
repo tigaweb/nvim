@@ -118,4 +118,21 @@ return {
         config = true,
         event = { "BufReadPre", "BufNewFile" },
     },
+    -- autopairs
+    {
+        "windwp/nvim-autopairs",
+        config = function()
+            require("nvim-autopairs").setup({
+                check_ts = true, -- Treesitter を使った文脈認識を有効化
+            })
+        end,
+        event = "InsertEnter", -- 挿入モードに入ったときに読み込む
+    },
+    {
+        "numToStr/Comment.nvim",
+        config = function()
+            require("Comment").setup()
+        end,
+        event = "BufReadPre",
+    },
 }

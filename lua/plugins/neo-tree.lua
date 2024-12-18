@@ -30,8 +30,8 @@ return {
         require("neo-tree").setup({
             filesystem = {
                 close_if_last_window = false,
+                follow_current_file = true, -- 現在のファイルを自動でハイライト
                 filtered_items = {
-                    follow_current_file = true, -- 現在のファイルを自動でハイライト
                     hijack_netrw = true, -- netrw を無効化して Neo-tree を使用
                     visible = false, -- 隠しファイルはデフォルトで非表示
                     hide_dotfiles = true, -- .で始まるファイルを非表示
@@ -45,7 +45,6 @@ return {
             },
             custom_highlights = {
                 NeoTreeCurrentFile = { bg = "#e6e617", fg = "#ebdbb2", bold = true },
-                NeoTreeOtherBuffers = { bg = "#c317e6", fg = "#a89984", italic = true },
             },
             buffers = {
                 follow_current_file = true, -- 現在のファイルを追従
@@ -65,6 +64,12 @@ return {
                 },
             },
             event_handlers = {
+                {
+                    event = "neo_tree_buffer_ready", -- Neo-tree が初期化されたとき
+                    handler = function()
+                        vim.api.nvim_set_hl(0, "NeoTreeCurrentFile", { bg = "#e6e617", fg = "#ebdbb2", bold = true })
+                    end,
+                },
                 {
                     event = "neo_tree_window_before_open",
                     handler = function()

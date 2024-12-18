@@ -51,11 +51,9 @@ vim.keymap.set("n", "<leader>bd", ":bdelete<CR>", { noremap = true, silent = tru
 
 vim.keymap.set("n", "<leader>bo", ":BufOnly<CR>", { noremap = true, silent = true, desc = "Delete Other Buffers" })
 
-vim.defer_fn(function()
-    vim.api.nvim_set_hl(0, "NeoTreeCurrentFile", { bg = "#e6e617", fg = "#ebdbb2", bold = true })
-    vim.api.nvim_set_hl(0, "NeoTreeOtherBuffers", { bg = "#c317e6", fg = "#a89984", italic = true })
-end, 100)
-
+vim.cmd([[
+  highlight NeoTreeFileNameOpened guifg=#ff0000 gui=bold
+]])
 -- lazy setup
 require("lazy").setup(plugins, opts)
 

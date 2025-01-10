@@ -10,6 +10,10 @@ local lsp_servers = {
     "ts_ls",
     "html",
     "cssls",
+    -- "gopls@v0.16.0", -- インストール時のみ利用
+    "gopls",
+    "intelephense",
+    -- "buf_ls", -- Mason 管理から除外（手動設定を使用）
 }
 
 local formatters = {
@@ -42,20 +46,80 @@ return {
             "nvimtools/none-ls.nvim",
         },
         config = function()
-            require("mason").setup()
+            require("mason").setup({
+                PATH = "prepend", -- PATH に手動インストール済みのバイナリを優先させる
+            })
             require("mason-lspconfig").setup({
                 -- lsp_servers table Install
                 ensure_installed = lsp_servers,
+                automatic_installation = false,
             })
 
             local lsp_config = require("lspconfig")
             -- lsp_servers table setup
             for _, lsp_server in ipairs(lsp_servers) do
-                lsp_config[lsp_server].setup({
+                if lsp_server == "gopls" then
+                    -- gopls に特別な設定を適用
+                    lsp_config.gopls.setup({
+                        cmd = { vim.fn.expand("$HOME/go/bin/gopls") },
+                        root_dir = function(fname)
+                            return lsp_config.util.find_git_ancestor(fname) or vim.fn.getcwd()
+                        end,
+                        settings = {
+                            gopls = {
+                                analyses = {
+                                    unusedparams = true,
+                                },
+                                staticcheck = true,
+                            },
+                        },
+                    })
+                else
+                    -- 他のサーバーにはデフォルト設定を適用
+                    lsp_config[lsp_server].setup({
+                        root_dir = function(fname)
+                            return lsp_config.util.find_git_ancestor(fname) or vim.fn.getcwd()
+                        end,
+                    })
+                end
+            end
+
+            -- bufls を手動で設定
+            if lsp_config.buf_ls then
+                print("Configuring bufls...")
+                lsp_config.buf_ls.setup({
+                    -- cmd = { "buf", "lsp" },
+                    cmd = { "buf", "beta", "lsp" },
+                    filetypes = { "proto" }, -- 確認
                     root_dir = function(fname)
-                        return lsp_config.util.find_git_ancestor(fname) or vim.fn.getcwd()
+                        return lsp_config.util.root_pattern("buf.yaml")(fname) or vim.fn.getcwd()
+                    end,
+                    single_file_support = true,
+                    on_attach = function(client, bufnr)
+                        -- フォーマット機能を有効化
+                        client.server_capabilities.documentFormattingProvider = true
+                        client.server_capabilities.documentRangeFormattingProvider = true
+
+                        -- キーマップを設定（任意）
+                        local opts = { noremap = true, silent = true }
+                        -- vim.api.nvim_buf_set_keymap(
+                        --     bufnr,
+                        --     "n",
+                        --     "<leader>f",
+                        --     "<cmd>lua vim.lsp.buf.format({ async = true })<CR>",
+                        --     opts
+                        -- )
+                        vim.api.nvim_buf_set_keymap(
+                            bufnr,
+                            "n",
+                            "<leader><space>",
+                            ":!buf format -w %<CR>",
+                            { noremap = true, silent = true }
+                        )
                     end,
                 })
+            else
+                print("Error: bufls is not defined")
             end
         end,
         cmd = "Mason",

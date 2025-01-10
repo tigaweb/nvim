@@ -53,7 +53,12 @@ vim.keymap.set("n", "<leader>bo", ":BufOnly<CR>", { noremap = true, silent = tru
 
 vim.cmd([[
   highlight NeoTreeFileNameOpened guifg=#ff0000 gui=bold
+  highlight NeoTreeOtherBuffers guibg=#504945 gui=italic
+  highlight NeoTreeCurrentFile guibg=#3c3836 gui=bold
 ]])
+-- vim.api.nvim_set_hl(0, "NeoTreeFileNameOpened", { bg = nil }) -- デフォルトをリセット
+vim.api.nvim_set_hl(0, "NeoTreeCurrentFile", { bg = "#3c3836", fg = "#ebdbb2", bold = true })
+vim.api.nvim_set_hl(0, "NeoTreeOtherBuffers", { bg = "#504945", fg = "#a89984", italic = true })
 -- lazy setup
 require("lazy").setup(plugins, opts)
 

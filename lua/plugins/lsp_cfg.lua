@@ -10,7 +10,7 @@ local lsp_servers = {
     "ts_ls",
     "html",
     "cssls",
-    -- "gopls@v0.16.0", -- インストール時のみ利用
+    -- "gopls@v0.16.0",
     "gopls",
     "intelephense",
     -- "buf_ls", -- Mason 管理から除外（手動設定を使用）
@@ -84,6 +84,20 @@ return {
                 end
             end
 
+            -- bufls カスタム設定を定義
+            -- if not lsp_config.buf_ls then
+            --     lsp_config.buf_ls = {
+            --         default_config = {
+            --             cmd = { "buf", "ls" }, -- buf CLI のコマンド
+            --             filetypes = { "proto" }, -- .proto ファイルを対象
+            --             root_dir = function(fname)
+            --                 return lsp_config.util.find_git_ancestor(fname) or vim.fn.getcwd()
+            --             end,
+            --             single_file_support = true,
+            --         },
+            --     }
+            -- end
+
             -- bufls を手動で設定
             if lsp_config.buf_ls then
                 print("Configuring bufls...")
@@ -92,7 +106,9 @@ return {
                     cmd = { "buf", "beta", "lsp" },
                     filetypes = { "proto" }, -- 確認
                     root_dir = function(fname)
-                        return lsp_config.util.root_pattern("buf.yaml")(fname) or vim.fn.getcwd()
+                        return lsp_config.util.root_pattern("buf.yaml")(fname)
+                            or lsp_config.util.find_git_ancestor(fname)
+                            or vim.fn.getcwd()
                     end,
                     single_file_support = true,
                     on_attach = function(client, bufnr)
@@ -102,19 +118,12 @@ return {
 
                         -- キーマップを設定（任意）
                         local opts = { noremap = true, silent = true }
-                        -- vim.api.nvim_buf_set_keymap(
-                        --     bufnr,
-                        --     "n",
-                        --     "<leader>f",
-                        --     "<cmd>lua vim.lsp.buf.format({ async = true })<CR>",
-                        --     opts
-                        -- )
                         vim.api.nvim_buf_set_keymap(
                             bufnr,
                             "n",
-                            "<leader><space>",
-                            ":!buf format -w %<CR>",
-                            { noremap = true, silent = true }
+                            "<leader>f",
+                            "<cmd>lua vim.lsp.buf.format({ async = true })<CR>",
+                            opts
                         )
                     end,
                 })

@@ -14,6 +14,7 @@ local lsp_servers = {
     "gopls",
     "intelephense",
     -- "buf_ls", -- Mason 管理から除外（手動設定を使用）
+    "dockerls",
 }
 
 local formatters = {
@@ -25,7 +26,21 @@ local formatters = {
 local diagnostics = {
     "yamllint",
     "selene",
+    "eslint_d",
+    "hadolint",
 }
+
+local on_attach = function(client, bufnr)
+    -- キーマップを設定して `hover` 機能を有効化
+    local opts = { noremap = true, silent = true }
+    vim.api.nvim_buf_set_keymap(
+        bufnr,
+        "n",
+        "K", -- デフォルトで `K` にマッピング
+        "<cmd>lua vim.lsp.buf.hover()<CR>",
+        opts
+    )
+end
 
 return {
     -- lsp icons like vscode
@@ -74,6 +89,68 @@ return {
                             },
                         },
                     })
+                elseif lsp_server == "dockerls" then
+                    -- Dockerfile 用 LSP 設定
+                    lsp_config.dockerls.setup({
+                        root_dir = function(fname)
+                            return lsp_config.util.find_git_ancestor(fname) or vim.fn.getcwd()
+                        end,
+                        on_attach = function(client, bufnr)
+                            -- フォーマット機能を有効化
+                            client.server_capabilities.documentFormattingProvider = true
+
+                            -- キーマップを設定
+                            local opts = { noremap = true, silent = true }
+                            vim.api.nvim_buf_set_keymap(
+                                bufnr,
+                                "n",
+                                "<leader><space>",
+                                "<cmd>lua vim.lsp.buf.format({ async = true })<CR>",
+                                opts
+                            )
+                        end,
+                    })
+                elseif lsp_server == "ts_ls" then
+                    -- TypeScript/JavaScript 用 LSP 設定
+                    lsp_config.ts_ls.setup({
+                        root_dir = function(fname)
+                            return lsp_config.util.find_git_ancestor(fname) or vim.fn.getcwd()
+                        end,
+                        settings = {
+                            javascript = {
+                                format = {
+                                    semicolons = "insert",
+                                },
+                            },
+                            typescript = {
+                                format = {
+                                    semicolons = "insert",
+                                },
+                            },
+                        },
+                    })
+                elseif lsp_server == "yamlls" then
+                    lsp_config.yamlls.setup({
+                        settings = {
+                            yaml = {
+                                format = {
+                                    enable = true, -- フォーマットを有効化
+                                },
+                                schemaStore = {
+                                    enable = true,
+                                    url = "https://www.schemastore.org/api/json/catalog.json",
+                                },
+                                validate = true, -- 構文検証を有効化
+                            },
+                        },
+                    })
+                elseif lsp_server == "pyright" then
+                    lsp_config.pyright.setup({
+                        on_attach = on_attach, 
+                        root_dir = function(fname)
+                            return lsp_config.util.find_git_ancestor(fname) or vim.fn.getcwd()
+                        end,
+                    })
                 else
                     -- 他のサーバーにはデフォルト設定を適用
                     lsp_config[lsp_server].setup({
@@ -83,20 +160,6 @@ return {
                     })
                 end
             end
-
-            -- bufls カスタム設定を定義
-            -- if not lsp_config.buf_ls then
-            --     lsp_config.buf_ls = {
-            --         default_config = {
-            --             cmd = { "buf", "ls" }, -- buf CLI のコマンド
-            --             filetypes = { "proto" }, -- .proto ファイルを対象
-            --             root_dir = function(fname)
-            --                 return lsp_config.util.find_git_ancestor(fname) or vim.fn.getcwd()
-            --             end,
-            --             single_file_support = true,
-            --         },
-            --     }
-            -- end
 
             -- bufls を手動で設定
             if lsp_config.buf_ls then
@@ -121,9 +184,9 @@ return {
                         vim.api.nvim_buf_set_keymap(
                             bufnr,
                             "n",
-                            "<leader>f",
-                            "<cmd>lua vim.lsp.buf.format({ async = true })<CR>",
-                            opts
+                            "<leader><space>",
+                            ":!buf format -w %<CR>",
+                            { noremap = true, silent = true }
                         )
                     end,
                 })
@@ -156,28 +219,70 @@ return {
 
     -- none-ls
     {
-        -- "jose-elias-alvarez/null-ls.nvim",
         "nvimtools/none-ls.nvim",
         requires = "nvim-lua/plenary.nvim",
         config = function()
             local null_ls = require("null-ls")
 
-            -- formatters table
-            local formatting_sources = {}
-            for _, tool in ipairs(formatters) do
-                table.insert(formatting_sources, null_ls.builtins.formatting[tool])
-            end
+            -- カスタムフォーマッタの定義
+            local dockfmt = {
+                name = "dockfmt",
+                method = null_ls.methods.FORMATTING,
+                filetypes = { "dockerfile" },
+                generator = null_ls.generator({
+                    command = "dockfmt", -- dockfmt コマンドを指定
+                    args = { "fmt", "$FILENAME" }, -- ファイルパスを渡す
+                    -- to_stdin = false, -- 標準入力を使用しない
+                    -- format = "raw", -- フォーマット結果をそのまま出力
+                    on_output = function(params, done)
+                        -- 結果をパースして返却
+                        if params.err then
+                            vim.notify("Dockfmt error: " .. params.err, vim.log.levels.ERROR)
+                            done() -- エラーの場合は終了
+                            return
+                        end
 
-            -- diagnostics table
-            local diagnostics_sources = {}
-            for _, tool in ipairs(diagnostics) do
-                table.insert(diagnostics_sources, null_ls.builtins.diagnostics[tool])
-            end
+                        done({
+                            {
+                                text = params.output, -- フォーマット結果をテキストとして返却
+                                range = nil, -- 全体を置き換える
+                            },
+                        })
+                    end,
+                }),
+            }
+            -- ソースのリスト
+            local sources = {
+                -- React 用 Prettier
+                null_ls.builtins.formatting.prettier.with({
+                    filetypes = { "javascript", "typescript", "javascriptreact", "typescriptreact" },
+                }),
+                -- Dockerfile フォーマッタ (dockfmt)
+                dockfmt,
+                -- Dockerfile 用 Hadolint
+                null_ls.builtins.diagnostics.hadolint,
+                -- React 用 ESLint
+                null_ls.builtins.diagnostics.eslint_d,
+                -- null_ls.builtins.diagnostics.eslint_d.with({
+                --     command = "eslint_d",
+                --     filetypes = { "javascript", "typescript", "javascriptreact", "typescriptreact" },
+                --     condition = function(utils)
+                --         -- 設定ファイルが存在する場合のみ有効化
+                --         return utils.root_has_file({
+                --             ".eslintrc",
+                --             ".eslintrc.json",
+                --             ".eslintrc.js",
+                --             ".eslintignore",
+                --         })
+                --     end,
+                -- }),
+            }
 
-            -- none-ls setup
+            -- none-ls のセットアップ
             null_ls.setup({
+                sources = sources,
                 diagnostics_format = "[#{m}] #{s} (#{c})",
-                sources = vim.tbl_flatten({ formatting_sources, diagnostics_sources }),
+                debug = true, -- デバッグを有効化
             })
         end,
         event = { "BufReadPre", "BufNewFile" },

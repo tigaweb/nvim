@@ -169,9 +169,6 @@ return {
         "folke/which-key.nvim",
         event = "VeryLazy",
         opts = {
-            -- your configuration comes here
-            -- or leave it empty to use the default settings
-            -- refer to the configuration section below
             preset = "modern",
         },
         keys = {
@@ -183,5 +180,77 @@ return {
                 desc = "Buffer Local Keymaps (which-key)",
             },
         },
+    },
+
+    -- Dashboard (shortcut memo on startup)
+    {
+        "goolord/alpha-nvim",
+        event = "VimEnter",
+        dependencies = { "nvim-tree/nvim-web-devicons" },
+        config = function()
+            local alpha = require("alpha")
+            local dashboard = require("alpha.themes.dashboard")
+            dashboard.section.header.val = {
+                "",
+                "  NVIM",
+                "",
+            }
+            dashboard.section.buttons.val = {
+                dashboard.button("f", "  Find files", ":Telescope find_files<CR>"),
+                dashboard.button("g", "  Live grep", ":Telescope live_grep<CR>"),
+                dashboard.button("e", "  Neo-tree", ":Neotree toggle<CR>"),
+                dashboard.button("t", "  ToggleTerm", ":ToggleTerm<CR>"),
+                dashboard.button("q", "  Quit", ":qa<CR>"),
+            }
+            dashboard.section.footer.val = {
+                "Leader: <space>",
+                "- ff: find files, fg: live grep",
+                "- e: neo-tree, tt: terminal",
+            }
+            alpha.setup(dashboard.config)
+        end,
+    },
+
+    -- Conform: simple formatter runner (Biome / Ruff etc.)
+    {
+        "stevearc/conform.nvim",
+        event = { "BufWritePre" },
+        cmd = { "ConformInfo" },
+        opts = {
+            format_on_save = function(bufnr)
+                local disable_ft = { "sql" }
+                local ft = vim.bo[bufnr].filetype
+                if vim.tbl_contains(disable_ft, ft) then return end
+                return { timeout_ms = 2000, lsp_fallback = true }
+            end,
+            formatters_by_ft = {
+                javascript = { "biome" },
+                typescript = { "biome" },
+                javascriptreact = { "biome" },
+                typescriptreact = { "biome" },
+                json = { "biome" },
+                jsonc = { "biome" },
+                css = { "biome" },
+                markdown = { "biome" },
+                lua = { "stylua" },
+                sh = { "shfmt" },
+                python = { "ruff_format" },
+                yaml = { "yamlfmt" },
+            },
+            formatters = {
+                biome = {
+                    command = "biome",
+                    args = { "format", "--stdin-file-path", "$FILENAME" },
+                    stdin = true,
+                },
+            },
+        },
+    },
+
+    -- Glow: Markdown preview in terminal
+    {
+        "ellisonleao/glow.nvim",
+        cmd = "Glow",
+        opts = { style = "dark", width = 120 },
     },
 }

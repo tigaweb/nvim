@@ -15,18 +15,17 @@ local lsp_servers = {
     "intelephense",
     -- "buf_ls", -- Mason 管理から除外（手動設定を使用）
     "dockerls",
+    "marksman", -- Markdown LSP
 }
 
 local formatters = {
     "djlint",
     "stylua",
     "shfmt",
-    "prettier",
 }
 local diagnostics = {
     "yamllint",
     "selene",
-    "eslint_d",
     "hadolint",
 }
 
@@ -236,10 +235,6 @@ return {
             }
             -- ソースのリスト（安定版）
             local sources = {
-                -- React 用 Prettier
-                null_ls.builtins.formatting.prettier.with({
-                    filetypes = { "javascript", "typescript", "javascriptreact", "typescriptreact" },
-                }),
                 -- Dockerfile フォーマッタ (dockfmt)
                 dockfmt,
                 -- Dockerfile 用 Hadolint

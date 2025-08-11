@@ -47,6 +47,26 @@ keymap("n", "<leader>Lp", ":Lazy profile<cr>", ex_opts("Lazy profile"))
 -- 検索ハイライト解除
 keymap("n", "<ESC>", ":noh<cr>", ex_opts("Reset Highlight Search"))
 
+-- Warp terminal optimized keymaps
+-- Better escape sequence for Warp
+keymap("i", "jk", "<ESC>", ex_opts("Alternative Escape"))
+keymap("i", "<C-c>", "<ESC>", ex_opts("Ctrl-C Escape"))
+
+-- Terminal mode optimizations for Warp
+keymap("t", "<C-\\><C-n>", "<C-\\><C-n>", ex_opts("Exit Terminal Mode"))
+keymap("t", "<C-w>h", "<C-\\><C-n><C-w>h", ex_opts("Terminal: Move Left"))
+keymap("t", "<C-w>j", "<C-\\><C-n><C-w>j", ex_opts("Terminal: Move Down"))
+keymap("t", "<C-w>k", "<C-\\><C-n><C-w>k", ex_opts("Terminal: Move Up"))
+keymap("t", "<C-w>l", "<C-\\><C-n><C-w>l", ex_opts("Terminal: Move Right"))
+
+-- Warp-friendly buffer navigation
+keymap("n", "<S-l>", ":bnext<CR>", ex_opts("Next Buffer"))
+keymap("n", "<S-h>", ":bprevious<CR>", ex_opts("Previous Buffer"))
+
+-- Quick save (Warp handles Cmd+S nicely)
+keymap("n", "<C-s>", ":w<CR>", ex_opts("Quick Save"))
+keymap("i", "<C-s>", "<ESC>:w<CR>", ex_opts("Quick Save from Insert"))
+
 -- LSP関連のキーマッピングと設定
 vim.api.nvim_create_autocmd("LspAttach", {
     group = vim.api.nvim_create_augroup("UserLspConfig", {}),

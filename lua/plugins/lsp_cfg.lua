@@ -50,172 +50,155 @@ return {
         event = "InsertEnter",
     },
 
-    -- mason / mason-lspconfig / lspconfig
+    -- mason / lspconfig (simplified setup)
     {
         "williamboman/mason.nvim",
         dependencies = {
-            "williamboman/mason-lspconfig.nvim",
             "neovim/nvim-lspconfig",
-            "jay-babu/mason-null-ls.nvim",
-            -- "jose-elias-alvarez/null-ls.nvim",
             "nvimtools/none-ls.nvim",
         },
         config = function()
-            require("mason").setup({
-                PATH = "prepend", -- PATH に手動インストール済みのバイナリを優先させる
-            })
-            require("mason-lspconfig").setup({
-                -- lsp_servers table Install
-                ensure_installed = lsp_servers,
-                automatic_installation = false,
+            -- Mason setup with minimal configuration
+            local mason_status_ok, mason = pcall(require, "mason")
+            if not mason_status_ok then
+                vim.notify("Mason not found!", vim.log.levels.ERROR)
+                return
+            end
+            
+            mason.setup({
+                PATH = "prepend",
+                log_level = vim.log.levels.WARN, -- Reduce log noise
             })
 
-            local lsp_config = require("lspconfig")
-            -- lsp_servers table setup
+            local lsp_config_status_ok, lsp_config = pcall(require, "lspconfig")
+            if not lsp_config_status_ok then
+                vim.notify("Lspconfig not found!", vim.log.levels.ERROR)
+                return
+            end
+
+            -- Manual LSP server setup without mason-lspconfig
             for _, lsp_server in ipairs(lsp_servers) do
-                if lsp_server == "gopls" then
-                    -- gopls に特別な設定を適用
-                    lsp_config.gopls.setup({
-                        cmd = { vim.fn.expand("$HOME/go/bin/gopls") },
-                        root_dir = function(fname)
-                            return lsp_config.util.find_git_ancestor(fname) or vim.fn.getcwd()
-                        end,
-                        settings = {
-                            gopls = {
-                                analyses = {
-                                    unusedparams = true,
+                local setup_ok, _ = pcall(function()
+                    if lsp_server == "gopls" then
+                        lsp_config.gopls.setup({
+                            cmd = { vim.fn.expand("$HOME/go/bin/gopls") },
+                            root_dir = function(fname)
+                                return lsp_config.util.find_git_ancestor(fname) or vim.fn.getcwd()
+                            end,
+                            settings = {
+                                gopls = {
+                                    analyses = {
+                                        unusedparams = true,
+                                    },
+                                    staticcheck = true,
                                 },
-                                staticcheck = true,
                             },
-                        },
-                    })
-                elseif lsp_server == "dockerls" then
-                    -- Dockerfile 用 LSP 設定
-                    lsp_config.dockerls.setup({
-                        root_dir = function(fname)
-                            return lsp_config.util.find_git_ancestor(fname) or vim.fn.getcwd()
-                        end,
-                        on_attach = function(client, bufnr)
-                            -- フォーマット機能を有効化
-                            client.server_capabilities.documentFormattingProvider = true
+                        })
+                    elseif lsp_server == "dockerls" then
+                        lsp_config.dockerls.setup({
+                            root_dir = function(fname)
+                                return lsp_config.util.find_git_ancestor(fname) or vim.fn.getcwd()
+                            end,
+                            on_attach = function(client, bufnr)
+                                client.server_capabilities.documentFormattingProvider = true
+                                local opts = { noremap = true, silent = true }
+                                vim.api.nvim_buf_set_keymap(
+                                    bufnr,
+                                    "n",
+                                    "<leader><space>",
+                                    "<cmd>lua vim.lsp.buf.format({ async = true })<CR>",
+                                    opts
+                                )
+                            end,
+                        })
+                    elseif lsp_server == "ts_ls" then
+                        lsp_config.ts_ls.setup({
+                            root_dir = function(fname)
+                                return lsp_config.util.find_git_ancestor(fname) or vim.fn.getcwd()
+                            end,
+                            settings = {
+                                javascript = {
+                                    format = {
+                                        semicolons = "insert",
+                                    },
+                                },
+                                typescript = {
+                                    format = {
+                                        semicolons = "insert",
+                                    },
+                                },
+                            },
+                        })
+                    elseif lsp_server == "yamlls" then
+                        lsp_config.yamlls.setup({
+                            settings = {
+                                yaml = {
+                                    format = {
+                                        enable = true,
+                                    },
+                                    schemaStore = {
+                                        enable = true,
+                                        url = "https://www.schemastore.org/api/json/catalog.json",
+                                    },
+                                    validate = true,
+                                },
+                            },
+                        })
+                    elseif lsp_server == "pyright" then
+                        lsp_config.pyright.setup({
+                            on_attach = on_attach,
+                            root_dir = function(fname)
+                                return lsp_config.util.find_git_ancestor(fname) or vim.fn.getcwd()
+                            end,
+                        })
+                    else
+                        -- Default setup for other servers
+                        lsp_config[lsp_server].setup({
+                            root_dir = function(fname)
+                                return lsp_config.util.find_git_ancestor(fname) or vim.fn.getcwd()
+                            end,
+                        })
+                    end
+                end)
+                if not setup_ok then
+                    vim.notify("Failed to setup LSP server: " .. lsp_server, vim.log.levels.WARN)
+                end
+            end
 
-                            -- キーマップを設定
+            -- Manual setup for bufls
+            if lsp_config.buf_ls then
+                local buf_status_ok, _ = pcall(function()
+                    lsp_config.buf_ls.setup({
+                        cmd = { "buf", "beta", "lsp" },
+                        filetypes = { "proto" },
+                        root_dir = function(fname)
+                            return lsp_config.util.root_pattern("buf.yaml")(fname)
+                                or lsp_config.util.find_git_ancestor(fname)
+                                or vim.fn.getcwd()
+                        end,
+                        single_file_support = true,
+                        on_attach = function(client, bufnr)
+                            client.server_capabilities.documentFormattingProvider = true
+                            client.server_capabilities.documentRangeFormattingProvider = true
                             local opts = { noremap = true, silent = true }
                             vim.api.nvim_buf_set_keymap(
                                 bufnr,
                                 "n",
                                 "<leader><space>",
-                                "<cmd>lua vim.lsp.buf.format({ async = true })<CR>",
+                                ":!buf format -w %<CR>",
                                 opts
                             )
                         end,
                     })
-                elseif lsp_server == "ts_ls" then
-                    -- TypeScript/JavaScript 用 LSP 設定
-                    lsp_config.ts_ls.setup({
-                        root_dir = function(fname)
-                            return lsp_config.util.find_git_ancestor(fname) or vim.fn.getcwd()
-                        end,
-                        settings = {
-                            javascript = {
-                                format = {
-                                    semicolons = "insert",
-                                },
-                            },
-                            typescript = {
-                                format = {
-                                    semicolons = "insert",
-                                },
-                            },
-                        },
-                    })
-                elseif lsp_server == "yamlls" then
-                    lsp_config.yamlls.setup({
-                        settings = {
-                            yaml = {
-                                format = {
-                                    enable = true, -- フォーマットを有効化
-                                },
-                                schemaStore = {
-                                    enable = true,
-                                    url = "https://www.schemastore.org/api/json/catalog.json",
-                                },
-                                validate = true, -- 構文検証を有効化
-                            },
-                        },
-                    })
-                elseif lsp_server == "pyright" then
-                    lsp_config.pyright.setup({
-                        on_attach = on_attach, 
-                        root_dir = function(fname)
-                            return lsp_config.util.find_git_ancestor(fname) or vim.fn.getcwd()
-                        end,
-                    })
-                else
-                    -- 他のサーバーにはデフォルト設定を適用
-                    lsp_config[lsp_server].setup({
-                        root_dir = function(fname)
-                            return lsp_config.util.find_git_ancestor(fname) or vim.fn.getcwd()
-                        end,
-                    })
+                end)
+                if not buf_status_ok then
+                    vim.notify("Failed to setup bufls", vim.log.levels.WARN)
                 end
             end
-
-            -- bufls を手動で設定
-            if lsp_config.buf_ls then
-                print("Configuring bufls...")
-                lsp_config.buf_ls.setup({
-                    -- cmd = { "buf", "lsp" },
-                    cmd = { "buf", "beta", "lsp" },
-                    filetypes = { "proto" }, -- 確認
-                    root_dir = function(fname)
-                        return lsp_config.util.root_pattern("buf.yaml")(fname)
-                            or lsp_config.util.find_git_ancestor(fname)
-                            or vim.fn.getcwd()
-                    end,
-                    single_file_support = true,
-                    on_attach = function(client, bufnr)
-                        -- フォーマット機能を有効化
-                        client.server_capabilities.documentFormattingProvider = true
-                        client.server_capabilities.documentRangeFormattingProvider = true
-
-                        -- キーマップを設定（任意）
-                        local opts = { noremap = true, silent = true }
-                        vim.api.nvim_buf_set_keymap(
-                            bufnr,
-                            "n",
-                            "<leader><space>",
-                            ":!buf format -w %<CR>",
-                            { noremap = true, silent = true }
-                        )
-                    end,
-                })
-            else
-                print("Error: bufls is not defined")
-            end
         end,
         cmd = "Mason",
     },
 
-    -- mason-null-ls
-    {
-        "jay-babu/mason-null-ls.nvim",
-        -- event = { "BufReadPre", "BufNewFile" },
-        dependencies = {
-            "williamboman/mason.nvim",
-            -- "jose-elias-alvarez/null-ls.nvim",
-            "nvimtools/none-ls.nvim",
-        },
-        config = function()
-            require("mason-null-ls").setup({
-                automatic_setup = true,
-                -- formatters table and diagnostics table Install
-                ensure_installed = vim.tbl_flatten({ formatters, diagnostics }),
-                handlers = {},
-            })
-        end,
-        cmd = "Mason",
-    },
 
     -- none-ls
     {
@@ -251,7 +234,7 @@ return {
                     end,
                 }),
             }
-            -- ソースのリスト
+            -- ソースのリスト（安定版）
             local sources = {
                 -- React 用 Prettier
                 null_ls.builtins.formatting.prettier.with({
@@ -261,21 +244,6 @@ return {
                 dockfmt,
                 -- Dockerfile 用 Hadolint
                 null_ls.builtins.diagnostics.hadolint,
-                -- React 用 ESLint
-                null_ls.builtins.diagnostics.eslint_d,
-                -- null_ls.builtins.diagnostics.eslint_d.with({
-                --     command = "eslint_d",
-                --     filetypes = { "javascript", "typescript", "javascriptreact", "typescriptreact" },
-                --     condition = function(utils)
-                --         -- 設定ファイルが存在する場合のみ有効化
-                --         return utils.root_has_file({
-                --             ".eslintrc",
-                --             ".eslintrc.json",
-                --             ".eslintrc.js",
-                --             ".eslintignore",
-                --         })
-                --     end,
-                -- }),
             }
 
             -- none-ls のセットアップ

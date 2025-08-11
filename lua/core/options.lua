@@ -5,8 +5,10 @@
 -- ファイル
 vim.opt.fileencoding = "utf-8" -- エンコーディングをUTF-8に設定
 vim.opt.fileencodings = { "utf-8", "sjis", "euc-jp", "latin1" }
-vim.opt.clipboard = "unnamed,unnamedplus"
+vim.opt.clipboard = "unnamedplus" -- システムクリップボードと統合
 vim.opt.swapfile = false -- スワップファイルを作成しない
+vim.opt.backup = false   -- バックアップファイルを作成しない
+vim.opt.undofile = true  -- アンドゥファイルを永続化
 -- vim.opt.helplang = "ja" -- ヘルプファイルの言語は日本語
 vim.opt.hidden = true    -- バッファを切り替えるときに
 --ファイルを保存しなくてもOKに
@@ -15,8 +17,11 @@ vim.opt.hidden = true    -- バッファを切り替えるときに
 vim.opt.cursorline = true -- カーソルがある行を強調
 -- vim.opt.cursorcolumn = true -- カーソルがある列を強調
 
--- クリップボード共有
-vim.opt.clipboard:append({ "unnamedplus" }) -- レジスタとクリップボードを共有
+-- Warp terminal 最適化
+vim.opt.termguicolors = true -- 24ビットカラー有効化
+vim.opt.timeout = true       -- タイムアウト有効化
+vim.opt.timeoutlen = 300     -- キーマップタイムアウトを短縮
+vim.opt.updatetime = 250     -- 更新時間を短縮（デフォルト4000ms）
 
 -- メニューとコマンド
 vim.opt.wildmenu = true -- コマンドラインで補完
@@ -29,8 +34,13 @@ vim.opt.hlsearch = true  -- ハイライト検索を有効
 vim.opt.incsearch = true -- インクリメンタルサーチを有効
 vim.opt.matchtime = 1    -- 入力された文字列がマッチするまでにかかる時間
 
+-- パフォーマンス最適化
+-- Noice.nvim 等のUIプラグインと相性が悪いため lazyredraw は無効化
+vim.opt.lazyredraw = false
+vim.opt.synmaxcol = 240      -- シンタックスハイライトの列数制限
+vim.opt.redrawtime = 10000   -- 描画タイムアウト時間
+
 -- カラースキーム
-vim.opt.termguicolors = true -- 24 ビットカラーを使用
 vim.opt.background = "dark"  -- ダークカラーを使用する
 
 -- インデント

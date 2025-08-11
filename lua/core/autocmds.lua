@@ -1,2 +1,13 @@
 -- ファイル保存時に自動フォーマット
 -- vim.cmd([[autocmd BufWritePre * lua vim.lsp.buf.format()]])
+
+-- Neo-tree自動起動設定（オプション）
+-- 下記をコメントアウトするとnvim起動時にNeo-treeが自動で開きます
+-- vim.api.nvim_create_autocmd("VimEnter", {
+--   callback = function()
+--     -- 引数なしでnvimを起動した場合のみNeo-treeを開く
+--     if vim.fn.argc() == 0 then
+--       vim.cmd("Neotree show")
+--     end
+--   end,
+-- })

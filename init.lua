@@ -23,9 +23,20 @@ local plugins = {
 local opts = {
     root = vim.fn.stdpath("data") .. "/lazy",
     lockfile = vim.fn.stdpath("config") .. "/lazy-lock.json",
-    concurrency = 10,
-    checker = { enabled = true },
-    log = { level = "info" },
+    concurrency = 5, -- 並行数を減らして安定性向上
+    checker = { enabled = false }, -- 自動チェックを無効化（起動時間短縮）
+    log = { level = "warn" }, -- ログレベルを下げてノイズ減少
+    performance = {
+        rtp = {
+            disabled_plugins = {
+                "gzip",
+                "tarPlugin", 
+                "tohtml",
+                "tutor",
+                "zipPlugin",
+            },
+        },
+    },
 }
 
 -- leader key
@@ -66,4 +77,5 @@ require("lazy").setup(plugins, opts)
 require("core.options")
 require("core.autocmds")
 require("core.keymaps")
+require("core.warp").setup()  -- Warp terminal optimizations
 require("user.ui")

@@ -1,15 +1,24 @@
 return {
-    -- colorscheme
+    -- colorscheme（Warp最適化）
     {
         "catppuccin/nvim",
         name = "catppuccin",
         lazy = false,
         priority = 21000,
+        config = function()
+          require("catppuccin").setup({
+            transparent_background = false, -- Warpでは透明背景を無効化
+            term_colors = true,
+            compile_path = vim.fn.stdpath("cache") .. "/catppuccin", -- コンパイルキャッシュ
+          })
+          vim.cmd.colorscheme("catppuccin")
+        end,
     },
 
     {
         "folke/tokyonight.nvim",
-        lazy = false,
+        enabled = false, -- catppuccinを優先して無効化（起動時間短縮）
+        lazy = true,
         priority = 1000,
         styles = {
             sidebars = "transparent",
@@ -86,7 +95,7 @@ return {
         end,
     },
 
-    -- noice
+    -- noice（Warp最適化）
     {
         "folke/noice.nvim",
         event = "VeryLazy",
@@ -95,9 +104,25 @@ return {
             "rcarriga/nvim-notify",
         },
         opts = {
+            cmdline = {
+                enabled = true,
+                view = "cmdline", -- Warpでは標準のcmdlineビューを使用
+            },
+            messages = {
+                enabled = true,
+                view = "mini", -- メッセージビューを軽量化
+            },
             routes = {
                 {
                     filter = { event = "msg_show", find = "E486: Pattern not found: .*" },
+                    opts = { skip = true },
+                },
+                {
+                    filter = { event = "msg_show", find = "search hit BOTTOM" },
+                    opts = { skip = true },
+                },
+                {
+                    filter = { event = "msg_show", find = "search hit TOP" },
                     opts = { skip = true },
                 },
             },
@@ -107,6 +132,9 @@ return {
                     ["vim.lsp.util.convert_input_to_markdown_lines"] = true,
                     ["vim.lsp.util.stylize_markdown"] = true,
                     ["cmp.entry.get_documentation"] = true, -- requires hrsh7th/nvim-cmp
+                },
+                progress = {
+                    enabled = false, -- LSP進捗表示を無効化（パフォーマンス向上）
                 },
             },
         },
@@ -134,5 +162,26 @@ return {
             require("Comment").setup()
         end,
         event = "BufReadPre",
+    },
+
+    -- which-key
+    {
+        "folke/which-key.nvim",
+        event = "VeryLazy",
+        opts = {
+            -- your configuration comes here
+            -- or leave it empty to use the default settings
+            -- refer to the configuration section below
+            preset = "modern",
+        },
+        keys = {
+            {
+                "<leader>?",
+                function()
+                    require("which-key").show({ global = false })
+                end,
+                desc = "Buffer Local Keymaps (which-key)",
+            },
+        },
     },
 }

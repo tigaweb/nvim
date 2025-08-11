@@ -3,7 +3,7 @@
 -- vim.cmd('language en_US') -- 表示言語を英語にする（Mac）
 
 -- ファイル
-vim.opt.fileencoding = "utf-8" -- エンコーディングをUTF-8に設定
+-- NOTE: fileencoding はバッファローカルで、ダッシュボード等の非修飾バッファで設定すると E21 が出るため設定しない
 vim.opt.fileencodings = { "utf-8", "sjis", "euc-jp", "latin1" }
 vim.opt.clipboard = "unnamedplus" -- システムクリップボードと統合
 vim.opt.swapfile = false -- スワップファイルを作成しない
